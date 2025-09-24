@@ -34,17 +34,6 @@ public class RentService implements RentApi {
                 .statusCode(is(200));
     }
 
-    public List<NewRentDTO> getRentsList(int userId, int itemId) {
-        return given()
-                .when()
-                .get("/rents/?userId=" + userId + "&itemId=" + itemId)
-                .then()
-                .statusCode(200)
-                .extract()
-                .as(new TypeRef<List<NewRentDTO>>() {
-                });
-    }
-
     @Override
     public int createRent(RentDTO rentDTO) {
         return given()

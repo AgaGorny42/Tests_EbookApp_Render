@@ -4,9 +4,7 @@ import com.ebook_app_render.dto.ItemDTO;
 import com.ebook_app_render.dto.NewItemDTO;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
-
 import java.util.List;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;
 
@@ -20,8 +18,7 @@ public class ItemService implements ItemApi {
                 .then()
                 .statusCode(200)
                 .extract()
-                .as(new TypeRef<List<NewItemDTO>>() {
-                });
+                .as(new TypeRef<List<NewItemDTO>>() {});
     }
 
     @Override
