@@ -1,85 +1,50 @@
 package com.ebook_app_render.service;
 
 import com.ebook_app_render.dto.ItemDTO;
-import com.ebook_app_render.tests.api.BaseApiTest;
+import com.ebook_app_render.dto.NewItemDTO;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
-import io.restassured.response.Response;
+
 import java.util.List;
+
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.is;
 
-public class ItemService extends BaseApiTest {
+public class ItemService implements ItemApi {
 
-    public List<ItemDTO> getItemsList() {
+    @Override
+    public List<NewItemDTO> getItemsForTitle(int userId, int titleId) {
         return given()
                 .when()
-                .get("/items/?userId="+ getUserId() + "&titleId="+ getFirstTitleId())
+                .get("/items/?userId=" + userId + "&titleId=" + titleId)
                 .then()
                 .statusCode(200)
                 .extract()
-                .as(new TypeRef<List<ItemDTO>>() {});
+                .as(new TypeRef<List<NewItemDTO>>() {
+                });
     }
 
-    public int addItemAndGetId(ItemDTO itemDTO) {
+    @Override
+    public int createItem(ItemDTO itemDTO) {
         return given()
                 .contentType(ContentType.JSON)
                 .body(itemDTO)
+                .log().all()
                 .when()
                 .post("/items/")
                 .then()
+                .log().all()
                 .statusCode(200)
                 .extract()
                 .as(Integer.class);
     }
 
-    public List<Integer> getAllItemsIds() {
-        return given()
+    @Override
+    public void deleteItem(int userId, int itemId) {
+        given()
                 .when()
-                .get("/items/?userId="+ getUserId()+ "&titleId="+ getFirstTitleId())
+                .delete("/items/?userId=" + userId + "&id=" + itemId)
                 .then()
-                .log().all()
-                .statusCode(200)
-                .extract()
-                .body()
-                .jsonPath().getList("id", Integer.class);
-    }
-
-    public void deleteItem(Integer id) {
-        Response response = given()
-                .when()
-                .log().all()
-                .delete("/items/?userId=" + getUserId() + "&id=" + id)
-                .then()
-                .log().all().extract().response();
-
-        int statusCode = response.getStatusCode();
-        if (statusCode == 200 || statusCode == 204) {
-            System.out.println("Deleted item " + id);
-        } else if (statusCode == 404) {
-            System.out.println("Item " + id + " not found.");
-        } else {
-            System.err.println("Failed to delete item " + id + ". Status: " + statusCode +
-                    " Body: " + response.getBody().asString());
-        }
-    }
-
-    public void deleteAllItems() {
-        List<Integer> ids = getAllItemsIds();
-        if (ids.isEmpty()) {
-            System.out.println("No item history");
-        } else {
-            System.out.println("Deleting " + ids.size() + " items: " + ids);
-            ids.forEach(this::deleteItem);
-        }
-    }
-
-    public void deleteAllItemsLessFirst() {
-        List<Integer> ids = getAllItemsIds().stream().skip(1).toList();
-        if (ids.isEmpty()) {
-            System.out.println("No item history");
-        } else {
-            System.out.println("Deleting " + ids.size() + " items: " + ids);
-            ids.forEach(this::deleteItem);
-        }
+                .statusCode(is(200));
     }
 }

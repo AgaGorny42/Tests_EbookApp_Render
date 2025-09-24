@@ -9,8 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+public class NewTitleDTO {
 
-public class RegisterDTO {
     private int id;
-    private boolean isNew;
+    private String author;
+    private String title;
+    private int year;
 }

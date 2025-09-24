@@ -13,8 +13,6 @@ public class LoginApiTest extends BaseApiTest{
 
     @Test
     void shouldLoginAndReturnUserId() {
-        int userId = getUserId();
-
         assertThat(userId, Matchers.is(notNullValue()));
         assertThat(userId, is(1145));
     }

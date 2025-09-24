@@ -1,24 +1,18 @@
 package com.ebook_app_render.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class NewRentDTO {
 
     private int id;
     private String customerName;
     private String rentDate;
     private String expirationDate;
-
-    public NewRentDTO() {
-    }
-
-    public NewRentDTO(int id, String rentDate, String expirationDate, String customerName) {
-        this.id = id;
-        this.rentDate = rentDate;
-        this.expirationDate = expirationDate;
-        this.customerName = customerName;
-    }
 }

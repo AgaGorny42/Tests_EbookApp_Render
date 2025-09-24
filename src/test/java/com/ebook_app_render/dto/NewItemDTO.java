@@ -9,8 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+public class NewItemDTO {
 
-public class RegisterDTO {
     private int id;
-    private boolean isNew;
+    private String purchaseDate;
+    private Status status;
 }

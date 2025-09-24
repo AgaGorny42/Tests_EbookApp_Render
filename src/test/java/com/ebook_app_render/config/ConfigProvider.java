@@ -12,18 +12,18 @@ public class ConfigProvider {
         try (InputStream input = ConfigProvider.class.getClassLoader()
                 .getResourceAsStream("application.properties")) {
             if (input == null) {
-                throw new RuntimeException("Nie znaleziono pliku application.properties w resources");
+                throw new RuntimeException("File application.properties not found in resources.");
             }
             properties.load(input);
         } catch (IOException e) {
-            throw new RuntimeException("Błąd podczas ładowania application.properties", e);
+            throw new RuntimeException("Error while loading application.properties", e);
         }
     }
 
     public static String get(String key) {
         String value = properties.getProperty(key);
         if (value == null) {
-            throw new IllegalArgumentException("Brak klucza w application.properties: " + key);
+            throw new IllegalArgumentException("Missing key in application.properties: " + key);
         }
         return value;
     }

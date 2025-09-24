@@ -21,6 +21,7 @@ public class LoginService extends BaseApiTest {
                 .extract()
                 .as(Integer.class);
     }
+
     public RegisterDTO registerRegisteredUser() {
         LoginDTO login = new LoginDTO("test1", "test1");
 

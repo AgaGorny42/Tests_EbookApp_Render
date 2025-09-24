@@ -1,64 +1,84 @@
 package com.ebook_app_render.tests.api;
 
-import com.ebook_app_render.dto.TitleDTO;
-import com.ebook_app_render.service.TitleService;
+import com.ebook_app_render.dto.*;
+import com.ebook_app_render.service.*;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
 public class TitleApiTest extends BaseApiTest {
 
-    TitleDTO newTitle = new TitleDTO(getUserId(), "test11", "test11", 2011);
-    TitleService titleService = new TitleService();
-
-    @Test
-    void shouldGetTitleListWithAtLeastOneTitle(){
-        titleService.deleteAllTitlesLessFirstOne();
-        assertTrue((titleService.getTitleList().size()) <= 1);
-    }
-
     @Test
     void shouldAddTitleAndReturnId() {
-        int titleId = new TitleService().addTitleAndGetId(newTitle);
+        int createdTitleId = titleApi.createTitle(getTitleDTO());
 
-        assertThat(titleId, is(notNullValue()));
+        assertThat(createdTitleId, is(notNullValue()));
     }
 
     @Test
     void shouldAddTwoTitlesAndCompareIds() {
-        int firstTitleId = new TitleService().addTitleAndGetId(newTitle);
-        int secondTitleId = new TitleService().addTitleAndGetId(newTitle);
+        TitleDTO newTitle2 = new TitleDTO(userId, "title2", "author2", 2026);
+
+        int firstTitleId = titleApi.createTitle(getTitleDTO());
+        int secondTitleId = titleApi.createTitle(newTitle2);
 
         assertThat(firstTitleId, not(equalTo(secondTitleId)));
     }
 
     @Test
-    void shouldValidateTitleResponseBody() {
-        List<TitleDTO> titles = titleService.getTitleList();
+    void shouldGetEmptyTitleList() {
+        deletionService.deleteTitlesWithDependencies(userId);
 
-        assertThat(titles, is(notNullValue()));
+        List<NewTitleDTO> titles = titleApi.getAllTitles(userId);
 
-        assertThat(titles.getFirst().getId(), is(notNullValue()));
-        assertThat(titles.getFirst().getAuthor(), is(equalTo("test11")));
-        assertThat(titles.getFirst().getTitle(), is(notNullValue()));
-        assertThat(titles.getFirst().getYear(), is(notNullValue()));
+        assertThat(titles, is(empty()));
     }
 
     @Test
-    void shouldBePossibleToDeleteTitleWithNoItemsAdded(){
-        TitleDTO titleDTO = new TitleDTO(getUserId(),"title", "author", 2025);
-        int titleId = titleService.addTitleAndGetId(titleDTO);
-        List<TitleDTO> beforeList = titleService.getTitleList();
+    void shouldValidateTitleResponseBody() {
+        titleApi.createTitle(getTitleDTO());
+        List<NewTitleDTO> titles = titleApi.getAllTitles(userId);
 
-        titleService.deleteTitle(titleId);
-        List<TitleDTO> afterList = titleService.getTitleList();
-        List<Integer>afterListIds = afterList.stream().map(TitleDTO::getId).toList();
+        assertThat(titles, is(notNullValue()));
+        assertThat(titles.size(), greaterThan(0));
 
-        assertThat(afterList.size(), is(beforeList.size() -1));
+        NewTitleDTO firstTitle = titles.getFirst();
+
+        assertThat(firstTitle.getId(), is(notNullValue()));
+        assertThat(firstTitle.getAuthor(), is(equalTo("Default Author")));
+        assertThat(firstTitle.getTitle(), is("Default Title"));
+        assertThat(firstTitle.getYear(), is(2025));
+    }
+
+    @Test
+    void shouldBePossibleToDeleteTitleWithNoItemsAdded() {
+        int titleId = titleApi.createTitle(getTitleDTO());
+        List<NewTitleDTO> beforeList = titleApi.getAllTitles(userId);
+
+        titleApi.deleteTitle(userId, titleId);
+
+        List<NewTitleDTO> afterList = titleApi.getAllTitles(userId);
+        List<Integer> afterListIds = afterList.stream().map(NewTitleDTO::getId).toList();
+
+        assertThat(afterList.size(), is(beforeList.size() - 1));
         assertThat(afterListIds, not(hasItem(titleId)));
+    }
+
+    @Test
+    void shouldDeleteAllTitlesWithDependencies() {
+        titleId = titleApi.createTitle(getTitleDTO());
+        itemId = itemApi.createItem(getItemDTO());
+        rentId = rentApi.createRent(getRentDTO());
+        List<NewTitleDTO> titlesBefore = titleApi.getAllTitles(userId);
+        System.out.println("Titles before deletion: " + titlesBefore.size());
+
+        deletionService.deleteTitlesWithDependencies(userId);
+
+        List<NewTitleDTO> titlesAfter = titleApi.getAllTitles(userId);
+        System.out.println("Titles after deletion: " + titlesAfter.size());
+        assertThat(titlesAfter, is(empty()));
     }
 }

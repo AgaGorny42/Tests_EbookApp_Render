@@ -1,22 +1,52 @@
 package com.ebook_app_render.tests.api;
 
 import com.ebook_app_render.config.ConfigProvider;
-import com.ebook_app_render.dto.LoginDTO;
-import com.ebook_app_render.dto.NewRentDTO;
-import com.ebook_app_render.service.ItemService;
-import com.ebook_app_render.service.LoginService;
-import com.ebook_app_render.service.RentService;
-import com.ebook_app_render.service.TitleService;
+import com.ebook_app_render.dto.*;
+import com.ebook_app_render.service.*;
 import io.restassured.RestAssured;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInstance;
 
-import java.util.List;
+import java.time.LocalDate;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class BaseApiTest {
 
+    protected TitleApi titleApi;
+    protected ItemApi itemApi;
+    protected RentApi rentApi;
+    protected DeletionService deletionService;
+    protected TitleService titleService;
+    protected ItemService itemService;
+    protected RentService rentService;
+
+    protected int userId;
+    protected int titleId;
+    protected int itemId;
+    protected int rentId;
+
+    String author = "Default Author";
+    String title = "Default Title";
+    int year = 2025;
+    String customer = "Default Customer";
+    String purchaseDate = "2025-02-10";
+    String today = LocalDate.now().toString();
+
     @BeforeAll
-    static void setup() {
+    void setupAll() {
         RestAssured.baseURI = ConfigProvider.get("api.baseUrl");
+
+        titleApi = new TitleService();
+        itemApi = new ItemService();
+        rentApi = new RentService();
+        titleService = new TitleService();
+        itemService = new ItemService();
+        rentService = new RentService();
+        deletionService = new DeletionService(titleApi, itemApi, rentApi);
+
+        userId = getUserId();
     }
 
     protected int getUserId() {
@@ -24,39 +54,23 @@ public abstract class BaseApiTest {
                 ConfigProvider.get("api.login"),
                 ConfigProvider.get("api.password")
         );
-        LoginService loginService = new LoginService();
-        return loginService.loginAndGetUserId(loginDTO);
+        return new LoginService().loginAndGetUserId(loginDTO);
     }
 
-    protected int getFirstTitleId() {
-        TitleService titleService = new TitleService();
-        int titleId = titleService.getTitleList().getFirst().getId();
-        if(titleId == 0) {
-            System.out.println("No titles.");
-        }else
-            System.out.println("First title id is: " + titleId);
-        return titleId;
+    protected TitleDTO getTitleDTO() {
+        return TitleDTO.builder().userId(userId).author(author).title(title).year(year).build();
     }
 
-    protected int getFirstItemId(){
-        ItemService itemService = new ItemService();
-        int itemId = itemService.getItemsList().getFirst().getId();
-        if(itemId == 0) {
-            System.out.println("No items.");
-        }else
-            System.out.println("First item id is: " + itemId);
-        return itemId;
+    protected ItemDTO getItemDTO() {
+        return ItemDTO.builder().userId(userId).titleId(titleId).purchaseDate(purchaseDate).build();
     }
 
-    protected int getFirstRentId(){
-        RentService rentService = new RentService();
-        List<NewRentDTO> rentalList = rentService.getRentsList();
-        int rentId = rentalList.getFirst().getId();
-        if(rentId == 0) {
-            System.out.println("No rentals.");
-        }else
-            System.out.println("First rental id is: " + rentId);
-        return rentId;
+    protected RentDTO getRentDTO() {
+        return RentDTO.builder().userId(userId).itemId(itemId).rentDate(today).customerName(customer).build();
+    }
+
+    @AfterEach
+    void cleanupAfterEach() {
+        deletionService.deleteAllTitlesWithDependencies(userId);
     }
 }
-

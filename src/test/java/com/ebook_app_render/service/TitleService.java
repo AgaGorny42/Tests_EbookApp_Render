@@ -1,22 +1,46 @@
 package com.ebook_app_render.service;
 
+import com.ebook_app_render.dto.NewTitleDTO;
 import com.ebook_app_render.dto.TitleDTO;
-import com.ebook_app_render.tests.api.BaseApiTest;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
-import io.restassured.response.Response;
 import java.util.List;
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.is;
 
-public class TitleService extends BaseApiTest {
+public class TitleService implements TitleApi{
 
-    public List<TitleDTO> getTitleList() {
+    @Override
+    public List<NewTitleDTO> getAllTitles(int userId) {
         return given()
                 .when()
-                .get("/titles/?userId=" + getUserId())
-                .then().statusCode(200)
+                .get("/titles/?userId=" + userId)
+                .then()
+                .statusCode(200)
                 .extract()
-                .as(new TypeRef<List<TitleDTO>>() {});
+                .as(new TypeRef<List<NewTitleDTO>>() {});
+    }
+
+    @Override
+    public int createTitle(TitleDTO request) {
+        return given()
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when()
+                .post("/titles/")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(Integer.class);
+    }
+
+    @Override
+    public void deleteTitle(int userId, int titleId) {
+        given()
+                .when()
+                .delete("/titles/?userId=" + userId + "&id=" + titleId)
+                .then()
+                .statusCode(is(200));
     }
 
     public int addTitleAndGetId(TitleDTO titleDTO) {
@@ -30,54 +54,23 @@ public class TitleService extends BaseApiTest {
                 .extract()
                 .as(Integer.class);
     }
-
-    public List<Integer> getAllTitleIds() {
-        return given()
-                .when()
-                .get("/titles/?userId=" + getUserId())
-                .then()
-                .log().all()
-                .statusCode(200)
-                .extract()
-                .jsonPath().getList("id", Integer.class);
-    }
-
-    public void deleteTitle(Integer id) {
-        Response response = given()
-                .when()
-                .log().all()
-                .delete("/titles/?userId=" + getUserId() + "&id=" + id)
-                .then()
-                .log().all().extract().response();
-
-        int statusCode = response.getStatusCode();
-        if (statusCode == 200 || statusCode == 204) {
-            System.out.println("Deleted title " + id);
-        } else if (statusCode == 404) {
-            System.out.println("Title " + id + " not found.");
-        } else {
-            System.err.println("Failed to delete title " + id + ". Status: " + statusCode +
-                    " Body: " + response.getBody().asString());
+    public void deleteAllTitles(int userId) {
+        List<NewTitleDTO> titles = getAllTitles(userId);
+        for (NewTitleDTO title : titles) {
+            deleteTitle(userId, title.getId());
         }
     }
 
-    public void deleteAllTitles() {
-        List<Integer> ids = getAllTitleIds();
-        if (ids.isEmpty()) {
-            System.out.println("No title history");
-        } else {
-            ids.forEach(this::deleteTitle);
-            System.out.println("Deleting " + ids.size() + " rents: " + ids);
+    // 🔹 Usuwa wszystkie tytuły oprócz pierwszego
+    public void deleteAllTitlesExceptFirst(int userId) {
+        List<NewTitleDTO> titles = getAllTitles(userId);
+        if (titles.size() <= 1) {
+            return; // nic nie usuwać
         }
-    }
 
-    public void deleteAllTitlesLessFirstOne() {
-        List<Integer> ids = getAllTitleIds().stream().skip(1).toList();
-        if (ids.isEmpty()) {
-            System.out.println("No title history");
-        } else {
-            ids.forEach(this::deleteTitle);
-            System.out.println("Deleting " + ids.size() + " rents: " + ids);
+        // zaczynamy od drugiego
+        for (int i = 1; i < titles.size(); i++) {
+            deleteTitle(userId, titles.get(i).getId());
         }
     }
 }
