@@ -19,7 +19,8 @@ public class ItemService implements ItemApi {
                 .then()
                 .statusCode(200)
                 .extract()
-                .as(new TypeRef<List<NewItemDTO>>() {});
+                .as(new TypeRef<>() {
+                });
     }
 
     @Override

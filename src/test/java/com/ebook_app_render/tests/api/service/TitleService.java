@@ -21,7 +21,7 @@ public class TitleService implements TitleApi {
                 .then()
                 .statusCode(200)
                 .extract()
-                .as(new TypeRef<List<NewTitleDTO>>() {
+                .as(new TypeRef<>() {
                 });
     }
 

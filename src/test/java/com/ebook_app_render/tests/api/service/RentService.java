@@ -22,7 +22,7 @@ public class RentService implements RentApi {
                 .then()
                 .statusCode(200)
                 .extract()
-                .as(new TypeRef<List<NewRentDTO>>() {
+                .as(new TypeRef<>() {
                 });
     }
 
