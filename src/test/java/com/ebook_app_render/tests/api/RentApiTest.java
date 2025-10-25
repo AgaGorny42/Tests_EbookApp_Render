@@ -1,7 +1,7 @@
 package com.ebook_app_render.tests.api;
 
-import com.ebook_app_render.dto.NewRentDTO;
-import org.junit.jupiter.api.*;
+import com.ebook_app_render.api.dto.NewRentDTO;
+import org.testng.annotations.Test;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -10,23 +10,22 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class RentApiTest extends BaseApiTest {
 
     @Test
-    void shouldRentOneItemAndVerifyId() {
+    public void shouldRentOneItemAndVerifyId() {
         titleId = titleApi.createTitle(getTitleDTO());
         itemId = itemApi.createItem(getItemDTO());
         rentId = rentApi.createRent(getRentDTO());
 
         List<NewRentDTO> rents = rentApi.getRentsForItem(userId, itemId);
-        int lastRent = rents.getLast().getId();
+        int lastRent = rents.get(rents.size() - 1).getId();
 
         assertThat(lastRent, is(equalTo(rentId)));
     }
 
     @Test
-    void shouldMakeTwoRentalAndCompareIdsTest() {
+    public void shouldMakeTwoRentalAndCompareIdsTest() {
         titleId = titleApi.createTitle(getTitleDTO());
         itemId = itemApi.createItem(getItemDTO());
         int firstRentId = rentApi.createRent(getRentDTO());
@@ -36,7 +35,7 @@ public class RentApiTest extends BaseApiTest {
     }
 
     @Test
-    void shouldGetEmptyRentList() {
+    public void shouldGetEmptyRentList() {
         deletionService.deleteTitlesWithDependencies(userId);
 
         List<NewRentDTO> rents = rentApi.getRentsForItem(userId, itemId);
@@ -45,14 +44,13 @@ public class RentApiTest extends BaseApiTest {
     }
 
     @Test
-    void shouldValidateIdAndCustomerName() {
+    public void shouldValidateIdAndCustomerName() {
         titleId = titleApi.createTitle(getTitleDTO());
         itemId = itemApi.createItem(getItemDTO());
         rentId = rentApi.createRent(getRentDTO());
 
         List<NewRentDTO> rentalList = rentApi.getRentsForItem(userId, itemId);
-
-        NewRentDTO lastRent = rentalList.getLast();
+        NewRentDTO lastRent = rentalList.get(rentalList.size() - 1);
 
         String actualCustomerName = lastRent.getCustomerName();
         String expectedCustomerName = "Default Customer";
@@ -62,37 +60,37 @@ public class RentApiTest extends BaseApiTest {
     }
 
     @Test
-    void rentalDayShouldBeSetUpForActualDay() {
+    public void rentalDayShouldBeSetUpForActualDay() {
         titleId = titleApi.createTitle(getTitleDTO());
         itemId = itemApi.createItem(getItemDTO());
         rentId = rentApi.createRent(getRentDTO());
 
         List<NewRentDTO> rentalList = rentApi.getRentsForItem(userId, itemId);
-        String actualRentDate = rentalList.getLast().getRentDate();
+        String actualRentDate = rentalList.get(rentalList.size() - 1).getRentDate();
         String expectedRentDate = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
 
         assertThat(expectedRentDate, is(equalTo(actualRentDate)));
     }
 
     @Test
-    void theRentalTimeIsSetUpForThreeDays() {
+    public void theRentalTimeIsSetUpForThreeDays() {
         titleId = titleApi.createTitle(getTitleDTO());
         itemId = itemApi.createItem(getItemDTO());
         rentId = rentApi.createRent(getRentDTO());
 
         List<NewRentDTO> rentalList = rentApi.getRentsForItem(userId, itemId);
-        LocalDate actualRentDate = LocalDate.parse(rentalList.getLast().getRentDate());
-        LocalDate expectedExpirationDate = LocalDate.parse(rentalList.getLast().getExpirationDate());
+        LocalDate actualRentDate = LocalDate.parse(rentalList.get(rentalList.size() - 1).getRentDate());
+        LocalDate expectedExpirationDate = LocalDate.parse(rentalList.get(rentalList.size() - 1).getExpirationDate());
 
         assertThat(expectedExpirationDate, is(actualRentDate.plusDays(3)));
     }
 
     @Test
-    void shouldChangeRentExpirationDateForFutureDateTest() {
+    public void shouldChangeRentExpirationDateForFutureDateTest() {
         titleId = titleApi.createTitle(getTitleDTO());
         itemId = itemApi.createItem(getItemDTO());
         rentId = rentApi.createRent(getRentDTO());
-        NewRentDTO rent = rentApi.getRentsForItem(userId, itemId).getFirst();
+        NewRentDTO rent = rentApi.getRentsForItem(userId, itemId).get(0);
 
         rent.setRentDate(LocalDate.now().toString());
 
@@ -106,7 +104,7 @@ public class RentApiTest extends BaseApiTest {
     }
 
     @Test
-    void shouldBePossibleToDeleteAllRentHistory() {
+    public void shouldBePossibleToDeleteAllRentHistory() {
         titleId = titleApi.createTitle(getTitleDTO());
         itemId = itemApi.createItem(getItemDTO());
         rentId = rentApi.createRent(getRentDTO());
@@ -119,4 +117,3 @@ public class RentApiTest extends BaseApiTest {
         assertThat(rentsAfter, is(empty()));
     }
 }
-

@@ -1,25 +1,25 @@
 package com.ebook_app_render.tests.api;
 
-import com.ebook_app_render.dto.*;
-import com.ebook_app_render.service.*;
-import org.junit.jupiter.api.Test;
+import com.ebook_app_render.api.dto.NewTitleDTO;
+import com.ebook_app_render.api.dto.TitleDTO;
+import org.testng.annotations.Test;
+
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-import java.util.List;
-
 public class TitleApiTest extends BaseApiTest {
 
     @Test
-    void shouldAddTitleAndReturnId() {
+    public void shouldAddTitleAndReturnId() {
         int createdTitleId = titleApi.createTitle(getTitleDTO());
 
         assertThat(createdTitleId, is(notNullValue()));
     }
 
     @Test
-    void shouldAddTwoTitlesAndCompareIds() {
+    public void shouldAddTwoTitlesAndCompareIds() {
         TitleDTO newTitle2 = new TitleDTO(userId, "title2", "author2", 2026);
 
         int firstTitleId = titleApi.createTitle(getTitleDTO());
@@ -29,7 +29,7 @@ public class TitleApiTest extends BaseApiTest {
     }
 
     @Test
-    void shouldGetEmptyTitleList() {
+    public void shouldGetEmptyTitleList() {
         deletionService.deleteTitlesWithDependencies(userId);
 
         List<NewTitleDTO> titles = titleApi.getAllTitles(userId);
@@ -38,14 +38,14 @@ public class TitleApiTest extends BaseApiTest {
     }
 
     @Test
-    void shouldValidateTitleResponseBody() {
+    public void shouldValidateTitleResponseBody() {
         titleApi.createTitle(getTitleDTO());
         List<NewTitleDTO> titles = titleApi.getAllTitles(userId);
 
         assertThat(titles, is(notNullValue()));
         assertThat(titles.size(), greaterThan(0));
 
-        NewTitleDTO firstTitle = titles.getFirst();
+        NewTitleDTO firstTitle = titles.get(0);
 
         assertThat(firstTitle.getId(), is(notNullValue()));
         assertThat(firstTitle.getAuthor(), is(equalTo("Default Author")));
@@ -54,7 +54,7 @@ public class TitleApiTest extends BaseApiTest {
     }
 
     @Test
-    void shouldBePossibleToDeleteTitleWithNoItemsAdded() {
+    public void shouldBePossibleToDeleteTitleWithNoItemsAdded() {
         int titleId = titleApi.createTitle(getTitleDTO());
         List<NewTitleDTO> beforeList = titleApi.getAllTitles(userId);
 
@@ -68,7 +68,7 @@ public class TitleApiTest extends BaseApiTest {
     }
 
     @Test
-    void shouldDeleteAllTitlesWithDependencies() {
+    public void shouldDeleteAllTitlesWithDependencies() {
         titleId = titleApi.createTitle(getTitleDTO());
         itemId = itemApi.createItem(getItemDTO());
         rentId = rentApi.createRent(getRentDTO());

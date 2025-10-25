@@ -1,16 +1,24 @@
 package com.ebook_app_render.tests.api;
 
-import com.ebook_app_render.config.ConfigProvider;
-import com.ebook_app_render.dto.*;
-import com.ebook_app_render.service.*;
+import com.ebook_app_render.api.dto.ItemDTO;
+import com.ebook_app_render.api.dto.LoginDTO;
+import com.ebook_app_render.api.dto.RentDTO;
+import com.ebook_app_render.api.dto.TitleDTO;
+import com.ebook_app_render.api.service.DeletionService;
+import com.ebook_app_render.api.service.ItemApi;
+import com.ebook_app_render.api.service.RentApi;
+import com.ebook_app_render.api.service.TitleApi;
+import com.ebook_app_render.api.config.ConfigProvider;
+import com.ebook_app_render.tests.api.service.ItemService;
+import com.ebook_app_render.tests.api.service.LoginService;
+import com.ebook_app_render.tests.api.service.RentService;
+import com.ebook_app_render.tests.api.service.TitleService;
 import io.restassured.RestAssured;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.TestInstance;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 
 import java.time.LocalDate;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class BaseApiTest {
 
     protected TitleApi titleApi;
@@ -26,15 +34,15 @@ public abstract class BaseApiTest {
     protected int itemId;
     protected int rentId;
 
-    String author = "Default Author";
-    String title = "Default Title";
-    int year = 2025;
-    String customer = "Default Customer";
-    String purchaseDate = "2025-02-10";
-    String today = LocalDate.now().toString();
+    protected String author = "Default Author";
+    protected String title = "Default Title";
+    protected int year = 2025;
+    protected String customer = "Default Customer";
+    protected String purchaseDate = "2025-02-10";
+    protected String today = LocalDate.now().toString();
 
-    @BeforeAll
-    void setupAll() {
+    @BeforeClass(alwaysRun = true)
+    public void setupAll() {
         RestAssured.baseURI = ConfigProvider.get("api.baseUrl");
 
         titleApi = new TitleService();
@@ -57,19 +65,33 @@ public abstract class BaseApiTest {
     }
 
     protected TitleDTO getTitleDTO() {
-        return TitleDTO.builder().userId(userId).author(author).title(title).year(year).build();
+        return TitleDTO.builder()
+                .userId(userId)
+                .author(author)
+                .title(title)
+                .year(year)
+                .build();
     }
 
     protected ItemDTO getItemDTO() {
-        return ItemDTO.builder().userId(userId).titleId(titleId).purchaseDate(purchaseDate).build();
+        return ItemDTO.builder()
+                .userId(userId)
+                .titleId(titleId)
+                .purchaseDate(purchaseDate)
+                .build();
     }
 
     protected RentDTO getRentDTO() {
-        return RentDTO.builder().userId(userId).itemId(itemId).rentDate(today).customerName(customer).build();
+        return RentDTO.builder()
+                .userId(userId)
+                .itemId(itemId)
+                .rentDate(today)
+                .customerName(customer)
+                .build();
     }
 
-    @AfterEach
-    void cleanupAfterEach() {
+    @AfterMethod(alwaysRun = true)
+    public void cleanupAfterEach() {
         deletionService.deleteAllTitlesWithDependencies(userId);
     }
 }

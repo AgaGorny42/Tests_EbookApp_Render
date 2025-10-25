@@ -1,8 +1,11 @@
 package com.ebook_app_render.tests.api;
 
-import com.ebook_app_render.dto.*;
-import org.junit.jupiter.api.Test;
+import com.ebook_app_render.api.dto.NewItemDTO;
+import com.ebook_app_render.api.dto.Status;
+import org.testng.annotations.Test;
+
 import java.util.List;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -10,7 +13,7 @@ import static org.hamcrest.Matchers.*;
 public class ItemApiTest extends BaseApiTest {
 
     @Test
-    void shouldAddOneItemAndVerifyId() {
+    public void shouldAddOneItemAndVerifyId() {
         titleId = titleApi.createTitle(getTitleDTO());
         itemId = itemApi.createItem(getItemDTO());
 
@@ -18,7 +21,7 @@ public class ItemApiTest extends BaseApiTest {
     }
 
     @Test
-    void shouldAddTwoItemsAndCompareIds() {
+    public void shouldAddTwoItemsAndCompareIds() {
         titleId = titleApi.createTitle(getTitleDTO());
         int firstItemId = itemApi.createItem(getItemDTO());
         int secondItemId = itemApi.createItem(getItemDTO());
@@ -27,7 +30,7 @@ public class ItemApiTest extends BaseApiTest {
     }
 
     @Test
-    void shouldValidateItemResponseBody() {
+    public void shouldValidateItemResponseBody() {
         titleId = titleApi.createTitle(getTitleDTO());
         itemId = itemApi.createItem(getItemDTO());
         List<NewItemDTO> itemsList = itemApi.getItemsForTitle(userId, titleId);
@@ -35,16 +38,16 @@ public class ItemApiTest extends BaseApiTest {
         assertThat(itemsList, is(notNullValue()));
         assertThat(itemsList.size(), greaterThan(0));
 
-        NewItemDTO lastItem = itemsList.getLast();
+        NewItemDTO lastItem = itemsList.get(itemsList.size() - 1);
         String expectedPurchaseDate = "2025-02-10";
 
         assertThat(lastItem.getId(), is(notNullValue()));
         assertThat(lastItem.getPurchaseDate(), is(equalTo(expectedPurchaseDate)));
-        assertThat(itemsList.getFirst().getStatus(), is(equalTo(Status.AVAILABLE)));
+        assertThat(itemsList.get(0).getStatus(), is(equalTo(Status.AVAILABLE)));
     }
 
     @Test
-    void shouldBePossibleToDeleteNotRentedItem() {
+    public void shouldBePossibleToDeleteNotRentedItem() {
         titleId = titleApi.createTitle(getTitleDTO());
         itemId = itemApi.createItem(getItemDTO());
 
@@ -60,7 +63,7 @@ public class ItemApiTest extends BaseApiTest {
     }
 
     @Test
-    void shouldGetEmptyItemList() {
+    public void shouldGetEmptyItemList() {
         deletionService.deleteTitlesWithDependencies(userId);
 
         List<NewItemDTO> items = itemApi.getItemsForTitle(userId, titleId);
@@ -69,7 +72,7 @@ public class ItemApiTest extends BaseApiTest {
     }
 
     @Test
-    void shouldNotBePossibleToDeleteItemWithRentHistory() {
+    public void shouldNotBePossibleToDeleteItemWithRentHistory() {
         titleId = titleApi.createTitle(getTitleDTO());
         itemId = itemApi.createItem(getItemDTO());
         rentApi.createRent(getRentDTO());
@@ -82,3 +85,4 @@ public class ItemApiTest extends BaseApiTest {
         assertThat(items.stream().map(NewItemDTO::getId).toList(), hasItem(itemId));
     }
 }
+
