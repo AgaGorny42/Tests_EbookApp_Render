@@ -71,13 +71,3 @@ tasks.register('apiTests', Test) {
 allure {
     version = '2.25.0'
 }
-
-test.finalizedBy("openExtentReport")
-
-tasks.register("openExtentReport") {
-    doLast {
-        println "📄 Opening Extent Report..."
-        def reportPath = file("reports/ExtentReport.html").absolutePath
-        Desktop.desktop.browse(file(reportPath).toURI())
-    }
-}
