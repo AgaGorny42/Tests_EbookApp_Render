@@ -1,7 +1,6 @@
 package com.ebook_app_render.tests.ui;
 
 import com.ebook_app_render.ui.pages.ItemsPage;
-import com.ebook_app_render.ui.pages.LoginPage;
 import com.ebook_app_render.ui.pages.TitlesPage;
 import com.ebook_app_render.ui.utils.DriverSingleton;
 import org.testng.annotations.*;
@@ -13,12 +12,8 @@ public class TitlesPageTest extends BaseUiTest {
     private ItemsPage itemsPage;
     private SoftAssert softAssert;
 
-    @BeforeMethod
+    @BeforeClass
     public void setup() {
-        DriverSingleton.getDriver().get("https://ta-bookrental-fe.onrender.com/login");
-        loginPage = new LoginPage();
-        loginPage.waitForPageToBeLoaded();
-
         titlesPage = loginPage.successfulLogin(USER_LOGIN, USER_PASSWORD);
         titlesPage.waitForPageToBeLoaded();
     }
@@ -67,16 +62,18 @@ public class TitlesPageTest extends BaseUiTest {
 
     @Test
     public void shouldEditTitleTest() {
-        titlesPage.clickAddNewTitleButton().addTitle("No logo", "Naomi Klein", "2004");
-        titlesPage.editTitle("No logo", "Naomi Klein", "2024");
+        titlesPage.clickAddNewTitleButton().addTitle("NO LOGO", "Naomi Klein", "2004");
+        titlesPage.editTitle("NO LOGO", "Naomi Klein", "2024");
 
+        titlesPage.waitForPageToBeLoaded();
         titlesPage.waitForTitlesToLoad();
         int expectedYear = 2024;
-        int actualYear = titlesPage.findTitleByName("No logo").toDTO().getYear();
+        int actualYear = titlesPage.findTitleByName("NO LOGO").toDTO().getYear();
 
+        titlesPage.waitForPageToBeLoaded();
         softAssert.assertEquals(actualYear, expectedYear, "The expected year should be 2024.");
 
-        titlesPage.removeTitle("No logo");
+        titlesPage.removeTitle("NO LOGO");
         softAssert.assertAll();
     }
 
@@ -97,7 +94,7 @@ public class TitlesPageTest extends BaseUiTest {
 
         titlesPage.showCopiesOfTitle("Anne of Green Gables");
         itemsPage.removeItem("2021-02-05");
-        itemsPage.returnToTitlesPage().waitForPageToBeLoaded();
+        itemsPage.returnToTitlesPage();
         titlesPage.removeTitle("Anne of Green Gables");
         softAssert.assertAll();
     }
@@ -107,10 +104,10 @@ public class TitlesPageTest extends BaseUiTest {
         titlesPage.clickAddNewTitleButton().addTitle("No logo", "Naomi Klein", "2004");
         itemsPage = titlesPage.showCopiesOfTitle("No logo");
 
-        softAssert.assertTrue(DriverSingleton.getDriver().getCurrentUrl().contains("items"));
+        String currentUrl = DriverSingleton.getDriver().getCurrentUrl();
+        softAssert.assertTrue(currentUrl != null && currentUrl.contains("items"));
 
-        itemsPage.returnToTitlesPage().waitForTitlesToLoad();
-        System.out.println("After test: " + DriverSingleton.getDriver().getCurrentUrl());
+        itemsPage.returnToTitlesPage();
         titlesPage.removeTitle("No logo");
         softAssert.assertAll();
     }

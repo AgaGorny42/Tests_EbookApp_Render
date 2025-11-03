@@ -2,11 +2,9 @@ package com.ebook_app_render.ui.pages;
 
 import com.ebook_app_render.api.dto.NewRentDTO;
 import com.ebook_app_render.ui.utils.DatePeaker;
-import com.ebook_app_render.ui.utils.DriverSingleton;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import java.time.Duration;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -32,10 +30,10 @@ public class RentsPage extends BasePage {
 
     public RentsPage goToRentsPage(String itemPurchaseDate, String itemStatus) {
         itemsPage.clickAddNewButtonBy().setPurchaseDate(itemPurchaseDate);
-        itemsPage.clickSubmitButtonBy().waitForFogAnimatedToDisappear();
+        itemsPage.clickSubmitButtonBy();
+        itemsPage.waitForPageToBeLoaded();
         itemsPage.findItemByStatus(itemStatus).clickShowHistory();
 
-        WebDriverWait wait = new WebDriverWait(DriverSingleton.getDriver(), Duration.ofSeconds(15));
         wait.until(ExpectedConditions.urlContains("rents"));
 
         RentsPage rentsPage = new RentsPage();
@@ -61,17 +59,7 @@ public class RentsPage extends BasePage {
         inputCustomerName(customerName);
         clickSubmitButton();
         waitForPageToBeLoaded();
-        waitForLoaderToDisappear(LOADER_BY, RENT_ROW_LIST_BY, Duration.ofSeconds(15));
-    }
-
-    public void rentItemWithRentDateSetUpNotForToday(String customerName, String date) {
-        clickRentThisCopyButton();
-        inputCustomerName(customerName);
-        clickWhenReady(RENT_DATE_READ_ONLY_CLICK_BY);
-        datePeaker.setDate(date);
-        clickSubmitButton();
-        waitForPageToBeLoaded();
-        waitForLoaderToDisappear(LOADER_BY, RENT_ROW_LIST_BY, Duration.ofSeconds(15));
+        waitForLoaderToDisappear(LOADER_BY, RENT_ROW_LIST_BY);
     }
 
     public void changeCustomerName(String customerName, String newCustomerName) {
@@ -89,6 +77,7 @@ public class RentsPage extends BasePage {
         datePeaker.setDate(newDate);
         clickSubmitButton();
         waitForFogAnimatedToDisappear();
+        waitForPageToBeLoaded();
     }
 
     public void changeExpirationDate(String customerName, String newDate) {
@@ -96,17 +85,21 @@ public class RentsPage extends BasePage {
         clickWhenReady(EXPIRATION_DATE_READ_ONLY_CLICK_BY);
         datePeaker.setDate(newDate);
         clickSubmitButton();
+        waitForFogAnimatedToDisappear();
+        waitForPageToBeLoaded();
     }
 
     public void removeRental(String customerName) {
+        waitForFogAnimatedToDisappear();
+        waitForPageToBeLoaded();
         findRentalByCustomerName(customerName).clickRemove();
         waitForFogAnimatedToDisappear();
     }
 
     public ItemsPage returnToItemPage() {
+        waitForFogAnimatedToDisappear();
         clickWhenReady(RETURN_BUTTON_BY);
 
-        WebDriverWait wait = new WebDriverWait(DriverSingleton.getDriver(), Duration.ofSeconds(15));
         wait.until(ExpectedConditions.urlContains("items"));
 
         ItemsPage itemsPage = new ItemsPage();
@@ -119,8 +112,11 @@ public class RentsPage extends BasePage {
         returnToItemPage();
         itemsPage.findItemByStatus(status).clickRemove();
         waitForFogAnimatedToDisappear();
-        itemsPage.returnToTitlesPage().waitForTitlesToLoad();
-        titlesPage.findTitleByName(title).clickRemove();
+        itemsPage.waitForPageToBeLoaded();
+        itemsPage.returnToTitlesPage();
+        titlesPage.removeTitle(title);
+        titlesPage.waitForPageToBeLoaded();
+
     }
 
     public List<RentRow> getAllRents() {
@@ -153,8 +149,8 @@ public class RentsPage extends BasePage {
 
     @Override
     public void waitForPageToBeLoaded() {
-        new WebDriverWait(driver, WAITING_TIME.getDuration())
-                .until(ExpectedConditions.textToBe(By.cssSelector(TEXT_ON_PAGE_CSS)
+        WebDriverWait customWait = new WebDriverWait(driver, WAITING_TIME.getDuration());
+                customWait.until(ExpectedConditions.textToBe(By.cssSelector(TEXT_ON_PAGE_CSS)
                         , "RENTS HISTORY"));
     }
 }

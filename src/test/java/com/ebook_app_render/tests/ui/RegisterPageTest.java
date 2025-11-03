@@ -7,13 +7,13 @@ import com.ebook_app_render.ui.utils.TestDataGenerator;
 import org.testng.Assert;
 import org.testng.annotations.*;
 
-public class RegisterPageTest extends BaseUiTest {
+public class RegisterPageTest extends BaseUiTest{
 
     private RegisterPage registerPage;
 
     @BeforeMethod
     public void setup() {
-        DriverSingleton.getDriver().get("https://ta-bookrental-fe.onrender.com/register");
+        driver.get("https://ta-bookrental-fe.onrender.com/register");
 
         registerPage = new RegisterPage();
         registerPage.waitForPageToBeLoaded();
@@ -82,6 +82,7 @@ public class RegisterPageTest extends BaseUiTest {
         LoginPage loginPage = registerPage.getLoginPage();
         loginPage.waitForPageToBeLoaded();
 
-        Assert.assertTrue(DriverSingleton.getDriver().getCurrentUrl().contains("login"));
+        String currentUrl = DriverSingleton.getDriver().getCurrentUrl();
+        Assert.assertTrue(currentUrl != null && currentUrl.contains("login"));
     }
 }

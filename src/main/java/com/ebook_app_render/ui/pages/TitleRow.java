@@ -36,17 +36,17 @@ public class TitleRow extends BaseComponentPage {
     }
 
     public void clickShowCopies() {
-        WebElement showCopiesButton = rootElement.findElement(SHOW_COPIES_BUTTON_BY);
+        WebElement showCopiesButton = waitForElement(SHOW_COPIES_BUTTON_BY);
         clickWhenReady(showCopiesButton);
     }
 
     public void clickEdit() {
-        WebElement editButton = rootElement.findElement(EDIT_BUTTON_BY);
+        WebElement editButton = waitForElement(EDIT_BUTTON_BY);
         clickWhenReady(editButton);
     }
 
     public void clickRemove() {
-        WebElement removeButton = rootElement.findElement(REMOVE_BUTTON_BY);
+        WebElement removeButton = waitForElement(REMOVE_BUTTON_BY);
         clickWhenReady(removeButton);
     }
 }

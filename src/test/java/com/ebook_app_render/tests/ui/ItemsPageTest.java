@@ -1,10 +1,10 @@
 package com.ebook_app_render.tests.ui;
 
+import com.aventstack.extentreports.ExtentTest;
 import com.ebook_app_render.ui.pages.ItemsPage;
-import com.ebook_app_render.ui.pages.LoginPage;
 import com.ebook_app_render.ui.pages.RentsPage;
 import com.ebook_app_render.ui.pages.TitlesPage;
-import com.ebook_app_render.ui.utils.DriverSingleton;
+import io.qameta.allure.Allure;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -16,13 +16,10 @@ public class ItemsPageTest extends BaseUiTest {
     private TitlesPage titlesPage;
     private ItemsPage itemsPage;
     SoftAssert softAssert;
+    ExtentTest extentTest;
 
     @BeforeClass
     public void setup() {
-        DriverSingleton.getDriver().get("https://ta-bookrental-fe.onrender.com/login");
-        loginPage = new LoginPage();
-        loginPage.waitForPageToBeLoaded();
-
         titlesPage = loginPage.successfulLogin(USER_LOGIN, USER_PASSWORD);
         titlesPage.waitForPageToBeLoaded();
     }
@@ -42,7 +39,8 @@ public class ItemsPageTest extends BaseUiTest {
         softAssert.assertTrue(itemsPage.itemsPageIsLoaded(), "Items page has not been loaded.");
         softAssert.assertEquals(actualText, expectedText, "List of copies header text is incorrect.");
 
-        itemsPage.returnToTitlesPage().waitForTitlesToLoad();
+        waitForFogAnimatedToDisappear();
+        itemsPage.returnToTitlesPage();
         titlesPage.removeTitle("Beloved");
 
         softAssert.assertAll();
@@ -65,7 +63,7 @@ public class ItemsPageTest extends BaseUiTest {
 
         itemsPage.removeItem("2025-01-10");
         itemsPage.waitForPageToBeLoaded();
-        itemsPage.returnToTitlesPage().waitForTitlesToLoad();
+        itemsPage.returnToTitlesPage();
         titlesPage.removeTitle("No logo");
 
         softAssert.assertAll();
@@ -78,13 +76,13 @@ public class ItemsPageTest extends BaseUiTest {
         itemsPage.clickAddNewButtonBy().setPurchaseDate("2021-01-10");
         itemsPage.clickSubmitButtonBy().findItemByStatus("Available").clickRemove();
 
-        waitForFogAnimatedToDisappear();
+        itemsPage.waitForPageToBeLoaded();
         String actualAlert = itemsPage.getAlertMessage();
         String expectedAlert = "No copies...";
 
         softAssert.assertEquals(actualAlert, expectedAlert, "The item list is not empty.");
 
-        itemsPage.returnToTitlesPage().waitForTitlesToLoad();
+        itemsPage.returnToTitlesPage();
         titlesPage.removeTitle("Winnie the Pooh");
 
         softAssert.assertAll();
@@ -98,7 +96,7 @@ public class ItemsPageTest extends BaseUiTest {
         rentsPage.returnToItemPage().waitForLoaderToDisappear();
         itemsPage.findItemByStatus("Available").clickRemove();
 
-        waitForFogAnimatedToDisappear();
+        itemsPage.waitForPageToBeLoaded();
         String actualAlert = itemsPage.getAlertMessage();
         String expectedAlert = "You can't remove copy with the rents history!";
 
@@ -122,6 +120,8 @@ public class ItemsPageTest extends BaseUiTest {
         itemsPage.setPurchaseDate("2020-03-10");
         itemsPage.clickSubmitButtonBy();
 
+        waitForFogAnimatedToDisappear();
+        itemsPage.waitForPageToBeLoaded();
         String expectedPurchaseDate = "2020-03-10";
         String actualPurchaseDate = itemsPage.findItemByStatus("Available").getPurchaseDate();
 
@@ -129,39 +129,45 @@ public class ItemsPageTest extends BaseUiTest {
 
         itemsPage.removeItem("2020-03-10");
         itemsPage.waitForPageToBeLoaded();
-        itemsPage.returnToTitlesPage().waitForTitlesToLoad();
+        itemsPage.returnToTitlesPage();
         titlesPage.removeTitle("White Nights");
 
         softAssert.assertAll();
     }
 
     @Test(dataProvider = "purchaseDatesProvider")
-    public void shouldAddItemToTitleWith29thOfMonth(String purchaseDate) {
-        SoftAssert softAssert = new SoftAssert();
+    public void shouldSaveCorrectPurchaseDateDuringDaylightSavingTime(String purchaseDate) {
+        extentTest = extent.createTest("Verifying purchase date during DST for date: " + purchaseDate);
 
-        itemsPage = titlesPage.addTitleAndOpenListOfCopiesOfThisTitle("No logo", "Naomi Klein", "2004");
+        itemsPage = titlesPage.addTitleAndOpenListOfCopiesOfThisTitle("Don Quixote", "Miguel de Cervantes", "1605");
         itemsPage.clickAddNewButtonBy().setPurchaseDate(purchaseDate);
         itemsPage.clickSubmitButtonBy();
 
         String actualDate = itemsPage.findItemByStatus("Available").getPurchaseDate();
 
-        softAssert.assertEquals(actualDate, purchaseDate, "The displayed date is not the chosen one");
+        softAssert.assertEquals(actualDate, purchaseDate,
+                "Dates are shifted by one day during the daylight saving time period.");
+
+        extentTest.info("Verifying purchase date during DST. Expected: '"
+                + purchaseDate + "', Actual: '" + actualDate + "'");
+        Allure.step("Verifying purchase date during DST. Expected: '"
+                + purchaseDate + "', Actual: '" + actualDate + "'");
 
         itemsPage.removeItemByStatus("Available");
         itemsPage.waitForPageToBeLoaded();
-        itemsPage.returnToTitlesPage().waitForTitlesToLoad();
-        titlesPage.removeTitle("No logo");
+        itemsPage.returnToTitlesPage();
+        titlesPage.removeTitle("Don Quixote");
 
         softAssert.assertAll();
     }
 
     @DataProvider(name = "purchaseDatesProvider")
     public Object[][] purchaseDatesProvider() {
-        Object[][] dates = new Object[12][1];
-        for (int month = 1; month <= 12; month++) {
-            String monthStr = month < 10 ? "0" + month : String.valueOf(month);
-            dates[month - 1][0] = "2025-" + monthStr + "-29";
-        }
-        return dates;
+        return new Object[][] {
+                {"2025-10-26"},
+                {"2025-10-27"},
+                {"2026-03-29"},
+                {"2026-03-30"}
+        };
     }
 }

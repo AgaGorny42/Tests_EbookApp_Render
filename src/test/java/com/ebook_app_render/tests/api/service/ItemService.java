@@ -3,8 +3,10 @@ package com.ebook_app_render.tests.api.service;
 import com.ebook_app_render.api.dto.ItemDTO;
 import com.ebook_app_render.api.dto.NewItemDTO;
 import com.ebook_app_render.api.service.ItemApi;
+import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 import java.util.List;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;
@@ -45,5 +47,16 @@ public class ItemService implements ItemApi {
                 .delete("/items/?userId=" + userId + "&id=" + itemId)
                 .then()
                 .statusCode(is(200));
+    }
+
+    public int deleteItemAndGetStatus(int userId, int itemId) {
+        Response response = RestAssured
+                .given()
+                .when()
+                .delete("/items/?userId=" + userId + "&id=" + itemId)
+                .then()
+                .extract()
+                .response();
+        return response.getStatusCode();
     }
 }

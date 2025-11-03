@@ -2,11 +2,9 @@ package com.ebook_app_render.tests.api;
 
 import com.ebook_app_render.api.dto.NewItemDTO;
 import com.ebook_app_render.api.dto.Status;
+import org.testng.Assert;
 import org.testng.annotations.Test;
-
 import java.util.List;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
@@ -38,12 +36,12 @@ public class ItemApiTest extends BaseApiTest {
         assertThat(itemsList, is(notNullValue()));
         assertThat(itemsList.size(), greaterThan(0));
 
-        NewItemDTO lastItem = itemsList.get(itemsList.size() - 1);
+        NewItemDTO lastItem = itemsList.getLast();
         String expectedPurchaseDate = "2025-02-10";
 
         assertThat(lastItem.getId(), is(notNullValue()));
         assertThat(lastItem.getPurchaseDate(), is(equalTo(expectedPurchaseDate)));
-        assertThat(itemsList.get(0).getStatus(), is(equalTo(Status.AVAILABLE)));
+        assertThat(itemsList.getFirst().getStatus(), is(equalTo(Status.AVAILABLE)));
     }
 
     @Test
@@ -77,12 +75,12 @@ public class ItemApiTest extends BaseApiTest {
         itemId = itemApi.createItem(getItemDTO());
         rentApi.createRent(getRentDTO());
 
-        assertThatThrownBy(() -> itemApi.deleteItem(userId, itemId))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("500");
+        int status = itemService.deleteItemAndGetStatus(userId, itemId);
+        Assert.assertEquals(status, 500, "The actual status code is not correct.");
 
         List<NewItemDTO> items = itemApi.getItemsForTitle(userId, titleId);
         assertThat(items.stream().map(NewItemDTO::getId).toList(), hasItem(itemId));
+        System.out.println("The test passed - the item with the rental history was not deleted.");
     }
 }
 

@@ -6,6 +6,7 @@ import com.ebook_app_render.ui.pages.TitlesPage;
 import com.ebook_app_render.ui.utils.DriverSingleton;
 import org.testng.Assert;
 import org.testng.annotations.*;
+
 import static com.ebook_app_render.tests.ui.BaseUiTest.USER_LOGIN;
 import static com.ebook_app_render.tests.ui.BaseUiTest.USER_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,12 +45,12 @@ public class LoginPageTest {
     }
 
     @Test
-    public void goToRegisterPageTest(){
+    public void goToRegisterPageTest() {
         RegisterPage registerPage = loginPage.getRegisterPage();
 
-        Assert.assertTrue(DriverSingleton.getDriver().getCurrentUrl().contains("register"));
+        String currentUrl = DriverSingleton.getDriver().getCurrentUrl();
+        Assert.assertTrue(currentUrl != null && currentUrl.contains("register"));
         registerPage.getLoginPage().waitForPageToBeLoaded();
-        System.out.println("After test: " + DriverSingleton.getDriver().getCurrentUrl());
     }
 
     @Test

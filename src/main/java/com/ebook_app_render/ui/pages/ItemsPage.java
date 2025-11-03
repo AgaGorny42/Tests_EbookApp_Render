@@ -1,11 +1,9 @@
 package com.ebook_app_render.ui.pages;
 
 import com.ebook_app_render.ui.utils.DatePeaker;
-import com.ebook_app_render.ui.utils.DriverSingleton;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import java.time.Duration;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -24,7 +22,7 @@ public class ItemsPage extends BasePage {
     private final By INPUT_BY = By.cssSelector("input[name='purchase-date']");
 
     public void waitForItemsToLoad() {
-        waitForLoaderToDisappear(LOADER_BY, ITEM_LIST_BY, Duration.ofSeconds(10));
+        waitForLoaderToDisappear(LOADER_BY, ITEM_LIST_BY);
     }
 
     public void setPurchaseDate(String date) {
@@ -39,7 +37,7 @@ public class ItemsPage extends BasePage {
 
     public ItemsPage clickSubmitButtonBy() {
         clickWhenReady(ADD_COPY_BUTTON_BY);
-        waitForLoaderToDisappear(LOADER_BY, ITEM_LIST_BY, Duration.ofSeconds(10));
+        waitForLoaderToDisappear(LOADER_BY, ITEM_LIST_BY);
         return new ItemsPage();
     }
 
@@ -52,7 +50,6 @@ public class ItemsPage extends BasePage {
         clickAddNewButtonBy().setPurchaseDate(purchaseDate);
         clickSubmitButtonBy().findItemByStatus(status).clickShowHistory();
 
-        WebDriverWait wait = new WebDriverWait(DriverSingleton.getDriver(), Duration.ofSeconds(15));
         wait.until(ExpectedConditions.urlContains("rents"));
 
         RentsPage rentsPage = new RentsPage();
@@ -65,7 +62,7 @@ public class ItemsPage extends BasePage {
     }
 
     public TitlesPage returnToTitlesPage() {
-        clickReturnButtonWhenReady(RETURN_BUTTON_BY);
+        clickWhenReady(RETURN_BUTTON_BY);
         waitForPageToBeLoaded();
         TitlesPage titlesPage = new TitlesPage();
         titlesPage.waitForPageToBeLoaded();
@@ -99,6 +96,7 @@ public class ItemsPage extends BasePage {
     public void removeItem(String purchaseDate) {
         findItemByPurchaseDate(purchaseDate).clickRemove();
         waitForFogAnimatedToDisappear();
+        waitForPageToBeLoaded();
     }
 
     public void removeItemByStatus(String status) {
@@ -116,8 +114,8 @@ public class ItemsPage extends BasePage {
 
     @Override
     public void waitForPageToBeLoaded() {
-        new WebDriverWait(driver, WAITING_TIME.getDuration())
-                .until(ExpectedConditions.textToBe(By.cssSelector(TEXT_ON_PAGE_CSS)
+        WebDriverWait customWait = new WebDriverWait(driver, WAITING_TIME.getDuration());
+                customWait.until(ExpectedConditions.textToBe(By.cssSelector(TEXT_ON_PAGE_CSS)
                         , "LIST OF COPIES"));
     }
 }

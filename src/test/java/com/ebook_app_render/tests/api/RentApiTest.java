@@ -1,6 +1,9 @@
 package com.ebook_app_render.tests.api;
 
+import com.ebook_app_render.api.dto.NewItemDTO;
 import com.ebook_app_render.api.dto.NewRentDTO;
+import com.ebook_app_render.api.dto.Status;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.time.LocalDate;
@@ -19,7 +22,7 @@ public class RentApiTest extends BaseApiTest {
         rentId = rentApi.createRent(getRentDTO());
 
         List<NewRentDTO> rents = rentApi.getRentsForItem(userId, itemId);
-        int lastRent = rents.get(rents.size() - 1).getId();
+        int lastRent = rents.getLast().getId();
 
         assertThat(lastRent, is(equalTo(rentId)));
     }
@@ -50,7 +53,7 @@ public class RentApiTest extends BaseApiTest {
         rentId = rentApi.createRent(getRentDTO());
 
         List<NewRentDTO> rentalList = rentApi.getRentsForItem(userId, itemId);
-        NewRentDTO lastRent = rentalList.get(rentalList.size() - 1);
+        NewRentDTO lastRent = rentalList.getLast();
 
         String actualCustomerName = lastRent.getCustomerName();
         String expectedCustomerName = "Default Customer";
@@ -60,29 +63,42 @@ public class RentApiTest extends BaseApiTest {
     }
 
     @Test
-    public void rentalDayShouldBeSetUpForActualDay() {
+    public void rentalDayShouldBeToday() {
         titleId = titleApi.createTitle(getTitleDTO());
         itemId = itemApi.createItem(getItemDTO());
         rentId = rentApi.createRent(getRentDTO());
 
         List<NewRentDTO> rentalList = rentApi.getRentsForItem(userId, itemId);
-        String actualRentDate = rentalList.get(rentalList.size() - 1).getRentDate();
+        String actualRentDate = rentalList.getLast().getRentDate();
         String expectedRentDate = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
 
         assertThat(expectedRentDate, is(equalTo(actualRentDate)));
     }
 
     @Test
-    public void theRentalTimeIsSetUpForThreeDays() {
+    public void theRentalIsSetUpForThreeDays() {
         titleId = titleApi.createTitle(getTitleDTO());
         itemId = itemApi.createItem(getItemDTO());
         rentId = rentApi.createRent(getRentDTO());
 
         List<NewRentDTO> rentalList = rentApi.getRentsForItem(userId, itemId);
-        LocalDate actualRentDate = LocalDate.parse(rentalList.get(rentalList.size() - 1).getRentDate());
-        LocalDate expectedExpirationDate = LocalDate.parse(rentalList.get(rentalList.size() - 1).getExpirationDate());
+        LocalDate actualRentDate = LocalDate.parse(rentalList.getLast().getRentDate());
+        LocalDate expectedExpirationDate = LocalDate.parse(rentalList.getLast().getExpirationDate());
 
-        assertThat(expectedExpirationDate, is(actualRentDate.plusDays(3)));
+        Assert.assertEquals(expectedExpirationDate, actualRentDate.plusDays(3),
+                "The expected expiration date is incorrect. Prolonged by one day.");
+    }
+
+    @Test
+    public void theItemStatusShouldChangeToRentedAfterRental() {
+        titleId = titleApi.createTitle(getTitleDTO());
+        itemId = itemApi.createItem(getItemDTO());
+        rentId = rentApi.createRent(getRentDTO());
+
+        List<NewItemDTO> itemsList = itemApi.getItemsForTitle(userId, titleId);
+
+        Assert.assertEquals(itemsList.getFirst().getStatus(), Status.RENTED,
+                "The item status has not changed to rented.");
     }
 
     @Test
@@ -90,7 +106,7 @@ public class RentApiTest extends BaseApiTest {
         titleId = titleApi.createTitle(getTitleDTO());
         itemId = itemApi.createItem(getItemDTO());
         rentId = rentApi.createRent(getRentDTO());
-        NewRentDTO rent = rentApi.getRentsForItem(userId, itemId).get(0);
+        NewRentDTO rent = rentApi.getRentsForItem(userId, itemId).getFirst();
 
         rent.setRentDate(LocalDate.now().toString());
 

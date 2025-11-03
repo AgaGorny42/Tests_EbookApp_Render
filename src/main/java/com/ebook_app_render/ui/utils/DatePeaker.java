@@ -5,7 +5,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import java.time.Duration;
+
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
@@ -24,7 +24,7 @@ public class DatePeaker {
 
     public DatePeaker() {
         this.driver = DriverSingleton.getDriver();
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        this.wait = DriverSingleton.getWait();
         PageFactory.initElements(driver, this);
     }
 
@@ -36,7 +36,7 @@ public class DatePeaker {
     public void setDate(LocalDate date) {
         WebElement calendar = wait.until(d -> d.findElements(CALENDAR_BY).stream()
                 .filter(WebElement::isDisplayed).findFirst()
-                .orElse(null));
+                .orElseThrow());
 
         int targetYear = date.getYear();
 

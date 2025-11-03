@@ -59,12 +59,12 @@ public class RentRow extends BaseComponentPage{
     }
 
     public void clickEdit() {
-        WebElement editButton = rootElement.findElement(EDIT_BUTTON_BY);
+        WebElement editButton = waitForElement(EDIT_BUTTON_BY);
         clickWhenReady(editButton);
     }
 
     public void clickRemove() {
-        WebElement removeButton = rootElement.findElement(REMOVE_BUTTON_BY);
+        WebElement removeButton = waitForElement(REMOVE_BUTTON_BY);
         clickWhenReady(removeButton);
     }
  }

@@ -44,3 +44,10 @@ bin/
 # IntelliJ IDEA
 .idea/
 
+# Extent reports
+reports/
+test-output/
+target/extent-reports/
+screenshots/
+
+

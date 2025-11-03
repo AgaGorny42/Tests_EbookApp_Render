@@ -1,7 +1,8 @@
+import java.awt.Desktop
+
 plugins {
     id 'java'
-    id("org.springframework.boot") version "4.0.0-M2"
-    id("io.spring.dependency-management") version "1.1.7"
+    id 'io.qameta.allure' version '2.11.2'
 }
 
 group = 'org.example'
@@ -15,28 +16,68 @@ dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
     implementation("org.seleniumhq.selenium:selenium-java:4.35.0")
     implementation("org.seleniumhq.selenium:selenium-api:4.35.0")
     implementation("io.github.bonigarcia:webdrivermanager:6.2.0")
-    implementation group: 'org.springframework', name: 'spring-core', version: '7.0.0-M8'
-    implementation("org.hibernate.orm:hibernate-community-dialects:7.1.0.Final")
-    testImplementation("org.springframework.boot:spring-boot-starter-test:4.0.0-M2")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa:4.0.0-M2")
-    implementation("org.springframework.boot:spring-boot-starter-validation:4.0.0-M2")
-    implementation("com.mysql:mysql-connector-j:9.4.0")
 
+    testImplementation 'org.assertj:assertj-core:3.24.2'
     testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.5'
-    implementation ('com.github.javafaker:javafaker:1.0.2') { exclude module: 'snakeyaml' }
+
+    implementation('com.github.javafaker:javafaker:1.0.2') { exclude module: 'snakeyaml' }
     implementation group: 'org.yaml', name: 'snakeyaml', version: '2.2'
+
     implementation("org.projectlombok:lombok:1.18.40")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.40")
     annotationProcessor("org.projectlombok:lombok:1.18.40")
+
     testImplementation("org.testng:testng:7.11.0")
+
+    testImplementation 'io.qameta.allure:allure-testng:2.25.0'
+    testImplementation 'io.qameta.allure:allure-junit5:2.25.0'
+
+    testImplementation 'com.aventstack:extentreports:5.1.1'
+
 }
 
-test {
-    useTestNG()
+tasks.test {
+    useTestNG() {
+        suites 'src/test/resources/testng.xml'
+    }
     testLogging {
-        events "passed", "failed", "skipped"
+        events "PASSED", "FAILED", "SKIPPED"
+    }
+}
+
+tasks.register('uiTests', Test) {
+    useTestNG() {
+        suites 'src/test/resources/testng.xml'
+    }
+    include 'com/ebook_app_render/tests/ui/**'
+    testLogging {
+        events "PASSED", "FAILED", "SKIPPED"
+    }
+}
+
+tasks.register('apiTests', Test) {
+    useTestNG()
+    include 'com/ebook_app_render/tests/api/**'
+    testLogging {
+        events "PASSED", "FAILED", "SKIPPED"
+    }
+    jvmArgs += '--enable-native-access=ALL-UNNAMED'
+}
+
+allure {
+    version = '2.25.0'
+}
+
+test.finalizedBy("openExtentReport")
+
+tasks.register("openExtentReport") {
+    doLast {
+        println "📄 Opening Extent Report..."
+        def reportPath = file("reports/ExtentReport.html").absolutePath
+        Desktop.desktop.browse(file(reportPath).toURI())
     }
 }

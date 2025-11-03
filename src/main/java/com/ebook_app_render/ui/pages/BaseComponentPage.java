@@ -6,22 +6,19 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
-
 public class BaseComponentPage {
     protected WebElement rootElement;
+    protected WebDriverWait wait = DriverSingleton.getWait();
 
     public BaseComponentPage(WebElement rootElement) {
         this.rootElement = rootElement;
     }
 
     protected WebElement waitForElement(By locator) {
-        WebDriverWait wait = new WebDriverWait(DriverSingleton.getDriver(), Duration.ofSeconds(10));
         return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
     }
 
     protected void clickWhenReady(WebElement element) {
-        WebDriverWait wait = new WebDriverWait(DriverSingleton.getDriver(), Duration.ofSeconds(10));
         wait.until(ExpectedConditions.elementToBeClickable(element)).click();
     }
 }

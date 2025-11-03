@@ -1,14 +1,11 @@
 package com.ebook_app_render.ui.pages;
 
 import com.ebook_app_render.api.dto.TitleDTO;
-import com.ebook_app_render.ui.utils.DriverSingleton;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import java.time.Duration;
 import java.util.List;
 import java.util.NoSuchElementException;
-
 import static com.ebook_app_render.ui.utils.WaitingTime.WAITING_TIME;
 
 public class TitlesPage extends BasePage {
@@ -29,7 +26,7 @@ public class TitlesPage extends BasePage {
     private final By EDIT_TITLE_BUTTON_BY = By.cssSelector(".btn.btn--primary[name='submit-button']");
 
     public TitlesPage clickAddNewTitleButton() {
-        waitForFogAnimatedToDisappear();
+        waitForPageToBeLoaded();
         clickWhenReady(ADD_NEW_TITLE_BUTTON_BY);
         return this;
     }
@@ -48,7 +45,7 @@ public class TitlesPage extends BasePage {
     }
 
     public void waitForTitlesToLoad() {
-        waitForLoaderToDisappear(LOADER_BY, TITLES_LIST_BY, Duration.ofSeconds(15));
+        waitForLoaderToDisappear(LOADER_BY, TITLES_LIST_BY);
     }
 
     public List<TitleRow> getAllTitles() {
@@ -81,12 +78,14 @@ public class TitlesPage extends BasePage {
     }
 
     public void removeTitle(String title) {
-        waitForLoaderToDisappear(LOADER_BY, TITLES_LIST_BY, Duration.ofSeconds(5));
+        waitForFogAnimatedToDisappear();
+        waitForPageToBeLoaded();
         findTitleByName(title).clickRemove();
         waitForFogAnimatedToDisappear();
     }
 
     public void editTitle(String title, String author, String year) {
+        waitForPageToBeLoaded();
         waitForTitlesToLoad();
         findTitleByName(title).clickEdit();
         clearFormEditTitle();
@@ -97,30 +96,27 @@ public class TitlesPage extends BasePage {
         waitForTitlesToLoad();
     }
 
-    public void clearFormEditTitle(){
+    public void clearFormEditTitle() {
         waitForElement(EDIT_TITLE_TITLE_BY).clear();
         waitForElement(EDIT_TITLE_AUTHOR_BY).clear();
         waitForElement(EDIT_TITLE_YEAR_BY).clear();
     }
 
     public ItemsPage showCopiesOfTitle(String title) {
-        waitForTitlesToLoad();
+        waitForFogAnimatedToDisappear();
         findTitleByName(title).clickShowCopies();
 
-        WebDriverWait wait = new WebDriverWait(DriverSingleton.getDriver(), Duration.ofSeconds(15));
         wait.until(ExpectedConditions.urlContains("items"));
-        System.out.println("After wait: " + DriverSingleton.getDriver().getCurrentUrl());
 
         ItemsPage itemsPage = new ItemsPage();
         itemsPage.waitForPageToBeLoaded();
         return itemsPage;
     }
 
-    public ItemsPage addTitleAndOpenListOfCopiesOfThisTitle(String title, String author, String year){
+    public ItemsPage addTitleAndOpenListOfCopiesOfThisTitle(String title, String author, String year) {
         clickAddNewTitleButton().addTitle(title, author, year);
         showCopiesOfTitle(title);
 
-        WebDriverWait wait = new WebDriverWait(DriverSingleton.getDriver(), Duration.ofSeconds(15));
         wait.until(ExpectedConditions.urlContains("items"));
 
         ItemsPage itemsPage = new ItemsPage();
@@ -134,8 +130,9 @@ public class TitlesPage extends BasePage {
 
     @Override
     public void waitForPageToBeLoaded() {
-        new WebDriverWait(driver, WAITING_TIME.getDuration())
-                .until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(TEXT_ON_PAGE_CSS)));
+        WebDriverWait customWait = new WebDriverWait(driver, WAITING_TIME.getDuration());
+        customWait.until(ExpectedConditions.visibilityOfElementLocated(By.id(TITLES_ID_BY)));
+        customWait.until(ExpectedConditions.textToBe(By.cssSelector(TEXT_ON_PAGE_CSS), "TITLES CATALOG"));
     }
 
     public boolean isLoaded() {

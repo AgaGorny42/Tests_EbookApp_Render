@@ -1,11 +1,8 @@
 package com.ebook_app_render.ui.pages;
 
-import com.ebook_app_render.ui.utils.DriverSingleton;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
-import java.time.Duration;
 
 import static com.ebook_app_render.ui.utils.WaitingTime.WAITING_TIME;
 
@@ -20,18 +17,16 @@ public class RegisterPage extends BasePage {
     private final By SUCCESS_MESSAGE_BY = By.cssSelector("#app > div > form > div.alert.alert--success > p");
     private final By SUB_TITLE_ELEMENT_BY = By.xpath("//*[@id='app']/div/form/h2");
 
-    public RegisterPage userRegistration(String login, String password, String repeatPassword) {
+    public void userRegistration(String login, String password, String repeatPassword) {
         waitForElement(LOGIN_INPUT_BY).sendKeys(login);
         waitForElement(PASSWORD_INPUT_BY).sendKeys(password);
         waitForElement(REPEAT_PASSWORD_INPUT_BY).sendKeys(repeatPassword);
         waitForElement(SIGN_UP_BUTTON_BY).click();
-        return this;
     }
 
     public LoginPage getLoginPage() {
         waitForElement(LOGIN_BUTTON_BY).click();
 
-        WebDriverWait wait = new WebDriverWait(DriverSingleton.getDriver(), Duration.ofSeconds(10));
         wait.until(ExpectedConditions.urlContains("login"));
 
         LoginPage loginPage = new LoginPage();
@@ -53,8 +48,8 @@ public class RegisterPage extends BasePage {
 
     @Override
     public void waitForPageToBeLoaded() {
-        new WebDriverWait(driver, WAITING_TIME.getDuration())
-                .until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(SIGN_UP_CSS)));
+        WebDriverWait customWait = new WebDriverWait(driver, WAITING_TIME.getDuration());
+        customWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(SIGN_UP_CSS)));
     }
 
     public String getTextFromElement() {
