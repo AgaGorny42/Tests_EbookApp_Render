@@ -20,7 +20,10 @@ public class DriverSingleton {
         if (driver == null) {
             WebDriverManager.chromedriver().setup();
             ChromeOptions options = new ChromeOptions();
-            options.addArguments("--incognito"); //to avoid alert change password
+            options.addArguments("--incognito");//to avoid alert change password
+            options.addArguments("--headless=new");
+            options.addArguments("--no-sandbox");
+            options.addArguments("--disable-dev-shm-usage");
 
             driver = new ChromeDriver(options);
             driver.manage().window().maximize();
