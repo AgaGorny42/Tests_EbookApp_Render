@@ -114,6 +114,7 @@ public class RentsPage extends BasePage {
         waitForFogAnimatedToDisappear();
         itemsPage.waitForPageToBeLoaded();
         itemsPage.returnToTitlesPage();
+        titlesPage.waitForPageToBeLoaded();
         titlesPage.removeTitle(title);
         titlesPage.waitForPageToBeLoaded();
 

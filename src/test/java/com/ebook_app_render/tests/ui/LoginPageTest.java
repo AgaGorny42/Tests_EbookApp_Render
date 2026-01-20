@@ -9,8 +9,6 @@ import org.testng.annotations.*;
 
 import static com.ebook_app_render.tests.ui.BaseUiTest.USER_LOGIN;
 import static com.ebook_app_render.tests.ui.BaseUiTest.USER_PASSWORD;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class LoginPageTest {
 
@@ -31,7 +29,7 @@ public class LoginPageTest {
         String actualError = loginPage.getErrorMessage();
         String expectedError = "You can't leave fields empty";
 
-        assertEquals(expectedError, actualError, "Checking error message after failed login");
+        Assert.assertEquals(actualError, expectedError, "Checking error message after failed login");
     }
 
     @Test
@@ -41,7 +39,7 @@ public class LoginPageTest {
         String actualError = loginPage.getErrorMessage();
         String expectedError = "Login failed";
 
-        assertEquals(expectedError, actualError, "Checking error message after failed login");
+        Assert.assertEquals(actualError, expectedError, "Checking error message after failed login");
     }
 
     @Test
@@ -58,7 +56,7 @@ public class LoginPageTest {
         TitlesPage titlesPage = loginPage.successfulLogin(USER_LOGIN, USER_PASSWORD);
         titlesPage.waitForPageToBeLoaded();
 
-        assertTrue(titlesPage.isLoaded(), "TitlesPage is not loaded.");
+        Assert.assertTrue(titlesPage.isLoaded(), "TitlesPage is not loaded.");
     }
 
     @AfterClass

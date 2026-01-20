@@ -15,7 +15,7 @@ It demonstrates practical skills in **test automation**, **framework design**, a
 - **UI Tests:** Selenium WebDriver
 - **API Tests:** REST Assured
 - **Test Runner:** TestNG
-- **Assertions:** Hamcrest Matchers in API Tests
+- **Assertions:** Hamcrest Matchers
 - **Build Tool:** Gradle
 - **Reporting:** Allure Reports / Extent Reports / screenshots on fail
 - **CI/CD:** GitHub Actions 
