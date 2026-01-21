@@ -23,6 +23,12 @@ jobs:
       - name: Grant execute permission for Gradle wrapper
         run: chmod +x gradlew
 
+      - name: Clean previous test reports
+        run: |
+          rm -rf build
+          rm -rf reports/ExtentReport.html
+          rm -rf reports/screenshots
+
       - name: Build and run tests
         run: ./gradlew clean build test || true
 
